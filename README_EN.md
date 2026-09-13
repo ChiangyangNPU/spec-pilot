@@ -24,8 +24,9 @@ flowchart LR
 | Path | Content |
 |------|---------|
 | [.agents/skills/spec-pilot/](.agents/skills/spec-pilot/) | **The SpecPilot skill** — an executable pipeline for ZCode: `SKILL.md` main workflow + 6 numbered phase templates |
+| [examples/todo-cli/](examples/todo-cli/) | **A real full-level run** — the complete artifact chain of a CLI todo app, from SRS to test report, with code and tests actually green (42/42 unit tests passing) |
 | [ai-driven-process.md](ai-driven-process.md) | Design rationale: why it works this way, and the thinking behind key decisions (role separation, objective referee, circuit breaker) |
-| [software-development-phases/](software-development-phases/) | Eight articles on the traditional software engineering lifecycle (feasibility → requirements → design → coding → testing → deployment → maintenance + supporting processes), with Mermaid diagrams — the "theory reference" for each AI role |
+| [software-development-phases/](software-development-phases/) | Eight articles on the traditional software engineering lifecycle (feasibility → requirements → design → coding → testing → deployment → maintenance + supporting processes), with Mermaid diagrams. **Positioned as human-oriented background reading** — the pipeline itself does not read them; AI roles follow `SKILL.md` and its templates |
 
 ## Core Principles
 
@@ -73,6 +74,8 @@ docs/
 ├── 05-dev-doc.md        # Development doc (actual structure, deviations, run guide)
 └── 06-test-report.md    # Test report (per-round results, defects, trends)
 ```
+
+Want to see what a real run looks like? See [examples/todo-cli/](examples/todo-cli/) — a one-line requirement ("a CLI todo app with CRUD and priority sorting") turned into 8 artifact documents plus working code, with 42/42 unit tests passing.
 
 ## Customization
 
