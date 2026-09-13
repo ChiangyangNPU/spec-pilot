@@ -45,6 +45,31 @@ class TestAddCommand(CliTestBase):
         result = run_cli(["add", "x", "-p", "urgent"], self.todo_file)
         self.assertEqual(result.returncode, 2)
 
+    def test_add_multiline_rejected(self):
+        """TC-C1：多行内容退出码 2，不写入数据（fix-newline-content）"""
+        result = run_cli(["add", "第一行\n第二行"], self.todo_file)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("换行", result.stderr)
+        self.assertFalse(self.todo_file.exists())
+
+    def test_add_cr_rejected(self):
+        """TC-C2：含 \r 的内容退出码 2（fix-newline-content）"""
+        result = run_cli(["add", "带回车\r的内容"], self.todo_file)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("换行", result.stderr)
+
+    def test_legacy_multiline_file_still_loads(self):
+        """TC-C4：修复前保存的多行历史数据 load/list 不崩溃（fix-newline-content）"""
+        self.todo_file.parent.mkdir(parents=True, exist_ok=True)
+        self.todo_file.write_text(
+            json.dumps([{"id": 1, "content": "旧数据\n第二行", "priority": "normal", "done": False}],
+                       ensure_ascii=False),
+            encoding="utf-8",
+        )
+        result = run_cli(["list"], self.todo_file)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("旧数据", result.stdout)
+
 
 class TestListCommand(CliTestBase):
     def test_list_sorted_by_priority(self):

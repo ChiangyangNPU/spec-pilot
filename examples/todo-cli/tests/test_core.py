@@ -34,6 +34,18 @@ class TestAdd(TodoAppTestBase):
             self.app.add("")
         self.assertEqual(ctx.exception.exit_code, 2)
 
+    def test_add_newline_rejected(self):
+        """TC-C1：内容含换行符拒绝（fix-newline-content）"""
+        with self.assertRaises(TodoError) as ctx:
+            self.app.add("第一行\n第二行")
+        self.assertEqual(ctx.exception.exit_code, 2)
+
+    def test_add_carriage_return_rejected(self):
+        """TC-C2：内容含回车符拒绝（fix-newline-content）"""
+        with self.assertRaises(TodoError) as ctx:
+            self.app.add("带回车\r的内容")
+        self.assertEqual(ctx.exception.exit_code, 2)
+
     def test_add_invalid_priority(self):
         with self.assertRaises(TodoError) as ctx:
             self.app.add("x", "urgent")

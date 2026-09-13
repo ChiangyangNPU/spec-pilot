@@ -16,6 +16,8 @@ class TodoApp:
     def add(self, content: str, priority: str | None = None) -> Todo:
         if not content.strip():
             raise TodoError("待办内容不能为空", EXIT_USAGE)
+        if "\n" in content or "\r" in content:
+            raise TodoError("待办内容不能包含换行符（会破坏列表逐行显示）", EXIT_USAGE)
         try:
             prio = Priority.from_str(priority) if priority else Priority.NORMAL
         except ValueError as exc:

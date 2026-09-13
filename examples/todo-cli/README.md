@@ -19,6 +19,8 @@
 | `docs/06-test-report.md` | 阶段 4 | 逐用例结果、NFR 实测数据、收敛核对清单 |
 | `docs/lessons.md` | 验收后 | 复盘：模板哪里不顺、下次怎么改 |
 
+此外包含一次**交付后轻量级变更**的演示：`docs/changes/fix-newline-content/`——真实缺陷（内容含换行符破坏列表逐行显示）按轻量级路径走完 spec.md → 冻结用例 → 修复 → 回归（47/47 全绿）→ 增量合入主 SRS，展示 OpenSpec 式按变更归档的组织方式。
+
 ## 复现验证（零依赖，任何 Python 3.10+ 机器可跑）
 
 ```bash
