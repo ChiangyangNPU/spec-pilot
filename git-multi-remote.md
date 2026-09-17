@@ -128,30 +128,7 @@ git remote set-url github git@github.com:ChiangyangNPU/spec-pilot.git
 ssh -T git@github.com   # 输出 "Hi ChiangyangNPU!" 即认证成功
 ```
 
-### 5.2 大文件超出 GitHub 100MB 上限
-
-症状：`remote: error: File ... is 375.57 MB; this exceeds GitHub's file size limit of 100.00 MB`
-
-原因：`third_party/onnxruntime/lib/onnxruntime.pdb`（375MB，onnxruntime 调试符号）超 GitHub 硬上限。
-Gitee 仅警告（>50MB）但不拦截，GitHub 则硬性拒绝。
-
-处理（已执行）：从仓库移除 PDB 并重写提交：
-
-```bash
-# 1. 修改 .gitignore，删除 "!third_party/onnxruntime/lib/*.pdb" 放行规则
-# 2. 移出版本控制（磁盘文件保留，构建时重新生成）
-git rm --cached third_party/onnxruntime/lib/*.pdb
-git add .gitignore
-git commit --amend        # 重写初始提交（无 PDB）
-# 3. 重推两个仓库
-git push -f gitee master
-git push -u github master:main
-```
-
-> 注意：GitHub 会扫描**全部历史**，仅删除文件再提交无法通过，必须重写包含该文件的历史。
-> PDB 为构建产物，移除后不影响编译、运行与自研代码调试。
-
-### 5.3 国内网络无法访问 GitHub
+### 5.2 国内网络无法访问 GitHub
 
 症状：`Failed to connect to github.com port 443`
 

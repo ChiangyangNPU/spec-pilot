@@ -23,7 +23,7 @@ flowchart LR
 
 | Path | Content |
 |------|---------|
-| [.agents/skills/spec-pilot/](.agents/skills/spec-pilot/) | **The SpecPilot skill** — an executable pipeline for ZCode: `SKILL.md` main workflow + 6 numbered phase templates |
+| [.agents/skills/spec-pilot/](.agents/skills/spec-pilot/) | **The SpecPilot skill** — an executable pipeline for ZCode: `SKILL.md` main workflow + 6 numbered artifact templates (including the pre-coding frozen test-case template) + a coding checklist + a lightweight-change template |
 | [examples/todo-cli/](examples/todo-cli/) | **A real full-level run** — the complete artifact chain of a CLI todo app, from SRS to test report, with code and tests actually green (42/42 unit tests passing) |
 | [design-rationale.md](design-rationale.md) | Design rationale: why it works this way, and the thinking behind key decisions (role separation, objective referee, circuit breaker) |
 | [software-development-phases/](software-development-phases/) | Eight articles on the traditional software engineering lifecycle (feasibility → requirements → design → coding → testing → deployment → maintenance + supporting processes), with Mermaid diagrams. **Positioned as human-oriented background reading** — the pipeline itself does not read them; AI roles follow `SKILL.md` and its templates |
