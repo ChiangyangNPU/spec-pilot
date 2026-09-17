@@ -66,7 +66,7 @@ git remote -v
 | `git push gitee master` | 只推 Gitee（`master`） |
 | `git push github master:main` | 只推 GitHub（本地 `master` → 远程 `main`） |
 | `git pushall` | **一键同时推两个仓库** |
-| `git push gitee master --force-with-lease && git push github main --force-with-lease` | **一键强制同时推两个仓库** |
+| `git push gitee master --force-with-lease && git push github master:main --force-with-lease` | **一键强制同时推两个仓库**（GitHub 条同样必须带 `master:main` 映射） |
 
 > 注意：Git 默认 `push.default=simple`，要求本地/远程分支同名才允许裸 `git push github`。
 > 因 GitHub 侧分支名为 `main`（与本地 `master` 不同），单推 GitHub 必须带 `master:main` 映射。
@@ -128,7 +128,35 @@ git remote set-url github git@github.com:ChiangyangNPU/spec-pilot.git
 ssh -T git@github.com   # 输出 "Hi ChiangyangNPU!" 即认证成功
 ```
 
-### 5.2 国内网络无法访问 GitHub
+### 5.2 SSH 推送报 `Permission denied (publickey)`
+
+本机密钥存在却被拒，按以下顺序排查（均为实际遇到过的原因）：
+
+1. **先查远程 URL 的用户名**——必须是 `git@`，误写成其他用户名（如数字账号）时，服务端在公钥阶段直接拒绝，报错同样是 `Permission denied (publickey)`，极具迷惑性：
+
+   ```bash
+   git remote get-url github
+   # 正确：2620163829@github.com:ChiangyangNPU/spec-pilot.git
+   git remote set-url github 2620163829@github.com:ChiangyangNPU/spec-pilot.git
+   ```
+
+2. **核对公钥是否真的注册在当前账号**：在 GitHub **Settings → SSH and GPG keys → Authentication Keys**（不是 Signing Keys）中比对指纹：
+
+   ```bash
+   ssh-keygen -lf ~/.ssh/id_ed25519.pub
+   ```
+
+   页面指纹须与输出逐字符一致；添加时若提示 "Key is already in use"，说明该钥注册在另一个 GitHub 账号上，需先到那个账号删除。
+
+3. **用 Git 自带的 ssh 测试**（在 Git Bash 中）：
+
+   ```bash
+   ssh -T 2620163829@github.com   # 输出 "Hi ChiangyangNPU!" 即成功
+   ```
+
+   > Windows 自带 OpenSSH（`C:\Windows\System32\OpenSSH`）与 Git for Windows 自带 OpenSSH 行为可能不同，git 命令实际使用后者；排查时以 Git Bash / git 调用链的结果为准。
+
+### 5.3 国内网络无法访问 GitHub
 
 症状：`Failed to connect to github.com port 443`
 
@@ -151,4 +179,4 @@ Host github.com
 
 ---
 
-> 时间：2026-08-26　作者：chiangyang
+> 初版：2026-08-26　最近更新：2026-09-17（修正强制推送映射、补充 SSH publickey 排障）　作者：chiangyang
