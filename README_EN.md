@@ -72,7 +72,9 @@ docs/
 ├── 03-tasks.md          # Task list (checked off one by one)
 ├── 04-test-cases.md     # Test cases (reverse-generated from requirements and frozen before coding)
 ├── 05-dev-doc.md        # Development doc (actual structure, deviations, run guide)
-└── 06-test-report.md    # Test report (per-round results, defects, trends)
+├── 06-test-report.md    # Test report (per-round results, defects, trends)
+├── lessons.md           # Retrospective notes (appended after acceptance; read first on next run)
+└── changes/<change>/    # Lightweight artifacts for post-delivery changes (spec.md + 04 + 06; merged back after completion)
 ```
 
 Want to see what a real run looks like? See [examples/todo-cli/](examples/todo-cli/) — a one-line requirement ("a CLI todo app with CRUD and priority sorting") turned into 8 artifact documents plus working code, with 42/42 unit tests passing.
