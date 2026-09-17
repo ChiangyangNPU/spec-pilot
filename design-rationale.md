@@ -121,7 +121,9 @@ flowchart LR
         SB["容器沙箱<br/>隔离执行环境"]
     end
     subgraph 产物层
-        D1["01-srs.md"] --> D2["02-design.md"] --> D3["03-tasks.md"] --> D4["code/"] --> D5["06-test-report.md"]
+        D1["01-srs.md"] --> D2["02-design.md"] --> D3["03-tasks.md"]
+        D3 --> D4["04-test-cases.md（编码前冻结）"] --> D5["code/ + 05-dev-doc.md"]
+        D5 --> D6["06-test-report.md"]
     end
     R & DS & CD & TS --> S
     S --> CI
