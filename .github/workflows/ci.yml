@@ -45,3 +45,18 @@ jobs:
         with:
           name: specpilot-state
           path: examples/todo-cli/docs/.pipeline-state.json
+
+  # 沙箱自证：示例测试在容器内（无网络、只读根文件系统）真实跑通
+  sandbox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 构建沙箱镜像
+        run: docker build -t specpilot-sandbox:latest orchestrator
+
+      - name: 示例测试在沙箱内运行（--network none）
+        run: orchestrator/sandbox.sh examples/todo-cli python3 -m unittest discover -s tests
+
+      - name: 沙箱内网络确为不可达
+        run: "! orchestrator/sandbox.sh examples/todo-cli python3 -c \"import urllib.request; urllib.request.urlopen('https://example.com', timeout=3)\""
