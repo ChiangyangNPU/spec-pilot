@@ -21,11 +21,12 @@ flowchart LR
 
 ## 这是什么
 
-本仓库包含四部分：
+本仓库包含五部分：
 
 | 目录/文件 | 内容 |
 |-----------|------|
 | [.agents/skills/spec-pilot/](.agents/skills/spec-pilot/) | **SpecPilot skill**——ZCode 中的可执行流水线：`SKILL.md` 主流程 + 6 份带序号的阶段产物模板（含编码前冻结的测试用例模板）+ 编码自检清单 + 轻量级变更模板 |
+| [orchestrator/](orchestrator/README.md) | **薄编排器**——机械层首版：阶段门禁、熔断计数、退出码采集由脚本强制（`gate`/`test`/`reset`），"真实运行""最多 5 轮"从提示词承诺变为物理约束 |
 | [examples/todo-cli/](examples/todo-cli/) | **一次完整级真实运行的产物**——CLI 待办工具从 SRS 到测试报告的全链产物，代码与测试真实跑通（42/42 单测全绿），展示"跑完长什么样" |
 | [design-rationale.md](design-rationale.md) | 设计理念文档：为什么这样设计、关键决策（角色分离、客观裁判、熔断）的思考 |
 | [software-development-phases/](software-development-phases/) | 传统软件工程流程八篇（可行性 → 需求 → 设计 → 编码 → 测试 → 部署 → 维护 + 支持性过程），含 Mermaid 图。**定位是给人看的背景材料**——理解阶段划分的来龙去脉；流水线执行时并不读取它，AI 角色的工作规范以 `SKILL.md` 及其模板为准 |

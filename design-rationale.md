@@ -132,6 +132,9 @@ flowchart LR
 ```
 
 搭建要点：
+
+> **落地进度（2026-09）**：要点 1 即 `.agents/skills/spec-pilot/` 中的 SKILL 与模板；要点 2 的首版薄编排器已实现于 [orchestrator/specpilot.py](orchestrator/specpilot.py)——阶段门禁、熔断计数、退出码采集三件事已从提示词承诺变为脚本强制（`gate`/`test`/`reset`，详见其 README）；要点 3（容器沙箱）与要点 4 的 CI 化（结果从 CI 拉取而非 Agent 填写）仍为后续增强。
+
 1. **每个 Agent = 一个角色化提示词 + 前述各阶段文档作为工作规范**（`02-requirements.md` 就是需求 Agent 的规范，以此类推），输出严格套用产出物模板。
 2. **编排器**只是一个状态机脚本（shell/Python 均可）：按阶段调用 Agent 运行时，检查产出物存在且通过自检清单，再进入下一阶段；测试循环和熔断计数也在这里实现。
 3. **执行环境用容器沙箱**：AI 生成的代码自动执行（构建、测试），必须隔离运行，限制网络与文件系统权限。
