@@ -82,8 +82,13 @@ Want to see what a real run looks like? See [examples/todo-cli/](examples/todo-c
 
 ## Customization
 
-- Change pipeline rules: edit [SKILL.md](.agents/skills/spec-pilot/SKILL.md)
-- Change per-phase artifact formats: edit the numbered template in `references/`
+When modifying the pipeline, follow the **three-layer placement** rule to keep rules from piling up and diluting execution:
+
+1. **Judgment rules** (how to weigh trade-offs, when to escalate or exempt) → go in the [SKILL.md](.agents/skills/spec-pilot/SKILL.md) main text;
+2. **Structural requirements** (required sections, columns, self-check items) → go down into the "artifact self-check" list of the corresponding template in `references/`;
+3. **Mechanically checkable facts** (artifact existence, non-empty fields, checkbox state, exit codes, no gaps in coverage matrix) → go down into the [orchestrator](orchestrator/README.md) `gate`, enforced by script — never in prose.
+
+Before adding any rule to SKILL.md, ask whether it can be pushed down to the lower two layers; review the main text length periodically.
 
 ## License
 

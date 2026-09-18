@@ -84,8 +84,13 @@ docs/
 
 ## 定制
 
-- 修改流程规则：编辑 [SKILL.md](.agents/skills/spec-pilot/SKILL.md)
-- 修改各阶段产出物格式：编辑 `references/` 下对应序号的模板
+修改这套流程时遵循**三层归位**，防止规则越堆越厚、稀释执行：
+
+1. **判断性规则**（怎么权衡、何时升级、何时豁免）→ 写进 [SKILL.md](.agents/skills/spec-pilot/SKILL.md) 正文；
+2. **结构性要求**（该有哪些节、哪些列、哪些自检项）→ 下沉到 `references/` 对应模板的"产出物自检"清单，不占正文注意力；
+3. **可机械判定的**（产物存在性、非空、勾选状态、退出码、覆盖矩阵无缺口）→ 下沉到 [orchestrator](orchestrator/README.md) 的 `gate`，由脚本强制，正文一个字不提。
+
+每想往 SKILL.md 正文加一条规则，先问能不能降级到后两层；定期回顾正文长度。
 
 ## License
 
