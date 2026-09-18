@@ -50,6 +50,13 @@ class TestApplyTestResult(unittest.TestCase):
             state, _ = apply_test_result(state, 0, "pytest")
         self.assertLessEqual(len(state["history"]), 50)
 
+    def test_source_recorded(self):
+        state = {"rounds": 0, "tripped": False, "history": []}
+        _, entry_ci = apply_test_result(state, 0, "pytest", source="ci")
+        self.assertEqual(entry_ci["source"], "ci")
+        _, entry_session = apply_test_result(state, 0, "pytest")
+        self.assertEqual(entry_session["source"], "session")
+
 
 class TestSrsParsing(unittest.TestCase):
     def test_missing_acceptance_detected(self):

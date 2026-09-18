@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -49,14 +50,17 @@ def save_state(path: Path, state: dict) -> None:
 
 
 def apply_test_result(state: dict, exit_code: int, command: str,
-                      max_rounds: int = MAX_ROUNDS, ts: str | None = None) -> tuple[dict, dict]:
+                      max_rounds: int = MAX_ROUNDS, ts: str | None = None,
+                      source: str = "session") -> tuple[dict, dict]:
     """纯函数：把一次真实运行的退出码结算进状态。成功即循环结束（轮次清零）；
-    失败轮次 +1，达到上限置熔断。返回 (新状态, 历史条目)。"""
+    失败轮次 +1，达到上限置熔断。返回 (新状态, 历史条目)。
+    source 区分结果产出处："ci"（CI 环境）或 "session"（会话内）——CI 产结果原则的留痕。"""
     new = json.loads(json.dumps(state))
     entry = {
         "ts": ts or time.strftime("%Y-%m-%dT%H:%M:%S"),
         "command": command,
         "exit_code": exit_code,
+        "source": source,
     }
     if exit_code == 0:
         new["rounds"] = 0
@@ -262,7 +266,8 @@ def cmd_test(args) -> int:
         return EXIT_BREAKER
     proc = subprocess.run(cmd)  # 输出直通终端：结果客观可见
     command = " ".join(cmd)
-    state, entry = apply_test_result(state, proc.returncode, command)
+    source = "ci" if os.environ.get("CI", "").lower() in ("true", "1") else "session"
+    state, entry = apply_test_result(state, proc.returncode, command, source=source)
     save_state(DEFAULT_STATE, state)
     if proc.returncode == 0:
         print(f"✅ 退出码 0（轮次清零）｜已记录：{command}")
@@ -298,7 +303,7 @@ def cmd_status(_args) -> int:
         if entry.get("action") == "reset":
             label = f"reset  {entry.get('guidance', '')}"
         else:
-            label = f"exit={entry.get('exit_code')}  {entry.get('command', '')}"
+            label = f"exit={entry.get('exit_code')} [{entry.get('source', 'session')}]  {entry.get('command', '')}"
         print(f"  {entry.get('ts')}  {label}")
     print("产物：", " ".join(
         f"{p.name}{'✓' if p.exists() else '✗'}" for p in [

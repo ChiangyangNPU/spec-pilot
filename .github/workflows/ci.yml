@@ -1,0 +1,47 @@
+# SpecPilot 自证 CI：构建/测试结果由 CI 产出并留痕，"AI 说做完了"不算数——
+# 本仓库的绿灯是 GitHub Actions 跑出来的，不是任何人宣称的。
+name: specpilot
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 编排器自身单测（熔断状态机 + 解析函数）
+        run: python3 orchestrator/tests/test_specpilot.py
+
+      - name: SKILL 引用的模板文件齐全
+        run: |
+          missing=0
+          for f in $(grep -o 'references/[a-z0-9.-]*\.md' .agents/skills/spec-pilot/SKILL.md | sort -u); do
+            if [ ! -f ".agents/skills/spec-pilot/$f" ]; then echo "MISSING: $f"; missing=1; fi
+          done
+          exit $missing
+
+      - name: 示例项目门禁（完整级 4 道 + 轻量级）
+        run: |
+          cd examples/todo-cli
+          for phase in 1 2 3 final; do
+            python3 ../../orchestrator/specpilot.py gate "$phase"
+          done
+          python3 ../../orchestrator/specpilot.py gate 3 --changes fix-newline-content
+
+      # CI=true 时编排器在状态文件记 source=ci——这份记录由 CI 产出，供测试报告引用背书
+      - name: 示例构建与测试（CI 产结果）
+        run: |
+          cd examples/todo-cli
+          python3 ../../orchestrator/specpilot.py test -- python3 -m unittest discover -s tests
+
+      - name: 上传流水线状态留痕
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: specpilot-state
+          path: examples/todo-cli/docs/.pipeline-state.json

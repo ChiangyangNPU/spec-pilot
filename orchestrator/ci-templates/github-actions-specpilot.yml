@@ -1,0 +1,39 @@
+# SpecPilot 项目 CI 模板（复制到你的项目 .github/workflows/specpilot.yml）
+#
+# 作用：构建/测试结果由 CI 产出并留痕——流水线绿灯才算数，AI 自称"做完了"不算数。
+# 前提：orchestrator/（薄编排器）已随项目提交；命令按你的项目替换。
+name: specpilot
+
+on: [push, pull_request]
+
+jobs:
+  gate-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # 完整历史，基线 tag 可见
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # ① 阶段门禁：按流水线当前阶段启用对应 gate；全部完成后启用 gate final
+      # - run: python3 orchestrator/specpilot.py gate 1
+      # - run: python3 orchestrator/specpilot.py gate 2
+      # - run: python3 orchestrator/specpilot.py gate 3
+      # - run: python3 orchestrator/specpilot.py gate final
+
+      # ② 构建与测试：真实运行、退出码为准；GitHub Actions 环境下
+      #    编排器自动在 docs/.pipeline-state.json 记 source=ci（CI 产出的留痕）
+      - name: 构建与测试（替换为你的命令）
+        run: |
+          python3 orchestrator/specpilot.py test -- <你的构建命令>
+          python3 orchestrator/specpilot.py test -- <你的测试命令>
+
+      # ③ 状态留痕：上传运行记录（审计：轮次、退出码、source）
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: specpilot-state
+          path: docs/.pipeline-state.json
