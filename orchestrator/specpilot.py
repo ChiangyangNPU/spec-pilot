@@ -211,6 +211,9 @@ def gate_final(docs: Path, problems: list[str]) -> None:
     state = load_state(DEFAULT_STATE)
     if state.get("tripped"):
         problems.append("熔断未解除：须由用户新指引 reset 后才能进入交付")
+    dev_doc = read_doc(docs / "05-dev-doc.md", problems)
+    if dev_doc is not None and "从零新建" in dev_doc and not Path("README.md").exists():
+        problems.append("开发文档标注从零新建，但项目根缺少 README.md——README 是交付物的一部分")
 
 
 # ---------- 子命令 ----------

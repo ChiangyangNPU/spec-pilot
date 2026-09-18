@@ -21,7 +21,7 @@ python3 orchestrator/specpilot.py init
 python3 orchestrator/specpilot.py gate 1        # SRS 完整性（章节齐全、验收标准/验证方式列非空）
 python3 orchestrator/specpilot.py gate 2        # 设计覆盖（覆盖对照表存在、SRS 每条需求有落点）
 python3 orchestrator/specpilot.py gate 3        # 编码前一致性（任务/用例存在、覆盖矩阵无缺口）
-python3 orchestrator/specpilot.py gate final    # 收敛核对（任务全勾选、结论可交付、无 BLOCKED、熔断已解除）
+python3 orchestrator/specpilot.py gate final    # 收敛核对（任务全勾选、结论可交付、无 BLOCKED、熔断已解除、新建项目有 README）
 
 # 轻量级变更门禁
 python3 orchestrator/specpilot.py gate 3 --changes fix-newline-content
