@@ -60,6 +60,8 @@ orchestrator/sandbox.sh examples/todo-cli python3 -m unittest discover -s tests
 
 强制的边界：`--network none`（外联物理不可达）、仅挂载项目目录到 `/work`（项目外不可见）、`--read-only` + tmpfs `/tmp`（可写面收敛）、`--cap-drop ALL` + `no-new-privileges`（无特权可提）、宿主 UID 映射（不留 root 文件）、内存/CPU/PID 限额。需要第三方依赖的项目，构建含依赖的定制镜像（`SPECPILOT_SANDBOX_IMAGE` 覆盖）——依赖安装发生在构建期并留痕，运行期无网。自证 CI 的 sandbox 作业验证"沙箱内测试跑通 + 网络确为不可达"。
 
+**威胁模型与边界（如实声明）**：沙箱防的是 AI 生成代码**误伤项目之外的世界**，不是防御项目内部的恶意代码——测试代码本来就要写项目文件，挂载目录内的 `.git` 对容器内进程同样可写。需要更强保证（如 `.git` 单独只读挂载、gVisor、user namespace 隔离）属按需升级。另外 `sandbox.sh` 是 bash + Docker 组合，**Windows 需在 WSL2 中运行**。
+
 ## 边界与后续
 
 - 解析是**宽容的**：只依赖模板的结构特征（表格行、章节标题），不追求完整 Markdown 解析；模板结构大改时需同步调整 `specpilot.py`。
