@@ -17,8 +17,11 @@ flowchart TB
     CLI["cli.py<br/>argparse 子命令分发"] --> CORE["core.py<br/>业务规则（排序/校验）"]
     CORE --> STO["storage.py<br/>读写 JSON 文件"]
     STO --> DB[("~/.todo-cli.json")]
-    MODELS["models.py<br/>Todo/优先级枚举"] -.-> CORE
+    CORE -.-> MODELS["models.py<br/>Todo/优先级枚举"]
+    STO -.-> MODELS
 ```
+
+> 图中箭头一律为"依赖方向"（与第 3 节模块依赖图同语义）。
 
 ## 3. 模块划分
 
@@ -80,9 +83,11 @@ classDiagram
     TodoApp ..> TodoError : 业务错误时抛出
 ```
 
+> TodoApp 各变更方法（add/done/remove/set_priority）返回被操作的 Todo，供单元测试断言使用；CLI 层不消费返回值，仅打印确认文案。
+
 ## 5. 关键流程时序图
 
-UC-1 添加待办：
+UC-1 添加待办（含校验失败分支）：
 
 ```mermaid
 sequenceDiagram
@@ -92,27 +97,41 @@ sequenceDiagram
     participant STO as Storage
     U->>CLI: todo add "写周报" -p high
     CLI->>APP: add("写周报", "high")
-    APP->>APP: 校验内容非空、优先级合法
-    APP->>STO: load() 取现有列表
-    STO-->>APP: list[Todo]
-    APP->>APP: 分配 id = max+1，创建 Todo
-    APP->>STO: save(list)
-    CLI-->>U: 已添加：#1 [高] 写周报（退出码 0）
+    APP->>APP: 校验内容非空、不含换行符(\n/\r)、优先级合法
+    alt 校验失败
+        APP-->>CLI: 抛 TodoError（exit_code=2）
+        CLI-->>U: stderr 错误提示（退出码 2，数据不写入）
+    else 校验通过
+        APP->>STO: load() 取现有列表
+        STO-->>APP: list[Todo]
+        APP->>APP: 分配 id = max+1，创建 Todo
+        APP->>STO: save(list)
+        CLI-->>U: 已添加：#1 [高] 写周报（退出码 0）
+    end
 ```
 
-UC-3 完成待办（扩展流程：ID 不存在）：
+UC-3 完成待办（覆盖主流程与全部扩展流程）：
 
 ```mermaid
 sequenceDiagram
     participant U as 用户
     participant CLI as cli.py
     participant APP as TodoApp
-    U->>CLI: todo done 99
-    CLI->>APP: done(99)
+    participant STO as Storage
+    U->>CLI: todo done <id>
+    CLI->>APP: done(id)
     APP->>STO: load()
     STO-->>APP: list[Todo]
-    APP-->>CLI: 抛 TodoError("待办 #99 不存在", 1)
-    CLI-->>U: stderr: 待办 #99 不存在（退出码 1）
+    alt ID 不存在（扩展流程 1a）
+        APP-->>CLI: 抛 TodoError("待办 #id 不存在", 1)
+        CLI-->>U: stderr: 待办 #id 不存在（退出码 1）
+    else 已是完成状态（扩展流程 1b）
+        APP-->>CLI: 抛 TodoError("已经完成，无需重复操作", 1)
+        CLI-->>U: stderr: 待办 #id 已经完成（退出码 1）
+    else 正常
+        APP->>STO: save(list)
+        CLI-->>U: 已完成：#id（退出码 0）
+    end
 ```
 
 ## 6. 数据库设计
@@ -121,12 +140,9 @@ sequenceDiagram
 
 ```mermaid
 erDiagram
-    TODO_FILE_JSON {
-        int next_id_seq "待办列表自身有 id 字段，见下"
-    }
     TODO {
-        int id PK "单调递增，删除不复用"
-        string content "非空"
+        int id PK "新增取当前最大+1，允许复用"
+        string content "非空、不含换行符"
         string priority "high | normal | low"
         bool done "默认 false"
     }
@@ -137,8 +153,8 @@ erDiagram
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
 | 顶层 | 数组 | —— | `[Todo, ...]` |
-| `id` | int | >0，新增取当前最大 id+1（空表取 1） | 删除后不复用，保证 `rm`/`done` 目标明确 |
-| `content` | str | 非空字符串 | |
+| `id` | int | >0，新增取当前最大 id+1（空表取 1） | 删除后 id 允许复用（下次新增可能取回）；`rm`/`done` 以当前列表中的 id 为目标 |
+| `content` | str | 非空字符串，不含换行符（`\n`/`\r`） | fix-newline-content 变更合入 |
 | `priority` | str | ∈ {high, normal, low} | |
 | `done` | bool | —— | |
 
@@ -172,11 +188,15 @@ stateDiagram-v2
 
 | 接口 | 方法 | 路径/签名 | 入参 | 出参 | 错误码 |
 |------|------|-----------|------|------|--------|
-| add | 子命令 | `add CONTENT [-p PRIORITY]` | 内容、可选优先级 | `已添加：#N [标签] 内容` | 2：空内容/非法优先级 |
+| add | 子命令 | `add CONTENT [-p PRIORITY]` | 内容、可选优先级 | `已添加：#N [标签] 内容` | 2：空内容/含换行符/非法优先级 |
 | list | 子命令 | `list` | 无 | 每行 `#ID [标签] 内容`，已完成为 `[x] #ID [标签] 内容`，空表 `暂无待办` | —— |
 | done | 子命令 | `done ID` | 待办 ID | `已完成：#ID` | 1：不存在/已完成 |
 | rm | 子命令 | `rm ID` | 待办 ID | `已删除：#ID` | 1：不存在 |
-| pri | 子命令 | `pri ID PRIORITY` | 待办 ID、优先级 | `已修改优先级：#ID → 标签` | 1：不存在；2：非法优先级 |
+| pri | 子命令 | `pri ID PRIORITY` | 待办 ID、优先级 | `已修改优先级：#ID → 标签` | 1：不存在；2：非法优先级（优先级先校验：ID 与优先级均非法时返回 2） |
+
+统一规则：所有子命令读取数据文件遇到损坏/不可读 JSON 时抛 `TodoError`（退出码 1），接口表不再逐行重复。
+
+退出码语义边界：参数类校验（空内容、含换行、非法优先级）在业务层 `TodoApp` 执行，但性质属"用法错误"，由 `TodoError` 携带 `exit_code=2` 表达——退出码的分类依据是**错误的性质**（用法 vs 业务），不是校验发生的层；argparse 仅做类型转换（ID 传非整数时由 argparse 自行以退出码 2 拒绝）。
 
 调用示例（含失败场景）：
 
@@ -192,7 +212,7 @@ $ todo done 99
 
 ```
 todo-cli/
-├── todo/                 # 包：实现代码（对应用户家目录安装）
+├── todo/                 # 包：实现代码
 │   ├── __init__.py
 │   ├── models.py        # Todo、Priority、TodoError
 │   ├── storage.py       # Storage：JSON 读写
@@ -204,7 +224,7 @@ todo-cli/
 │   ├── test_storage.py
 │   ├── test_core.py
 │   └── test_cli.py
-├── todo.py               # 启动脚本（python todo.py add ...）
+├── todo.py               # 启动脚本：python3 todo.py <子命令>（与包同名但仅作脚本执行，无遮蔽影响；正式分发建议改 console-script 入口）
 └── docs/                 # 本产物链
 ```
 
@@ -213,6 +233,8 @@ todo-cli/
 | 日期 | 变更内容 | 原因 | 关联需求 |
 |------|----------|------|----------|
 | 2026-09-13 | 初版设计 | —— | 全部 |
+| 2026-09-13 | 合入 fix-newline-content：add 校验内容不含换行符（`\n`/`\r`），退出码 2 且数据不写入——同步至 UC-1 时序图、接口表、content 约束（此前漏同步，对抗式评审发现） | SRS 已合入变更沿链传播 | FR-1 |
+| 2026-09-19 | v1.0 对抗式设计评审（干净上下文子代理，输入仅 SRS + 设计）：12 项发现全部处置——11 项采纳修订本文（id 规则改为"允许复用"并与 max+1 分配一致、删除 ER 图残留字段 next_id_seq、架构图依赖方向与第 3 节统一、接口表补文件损坏错误码与 pri 校验顺序、退出码语义边界说明、UC-1/UC-3 时序图补异常分支与参与者声明、入口机制澄清、返回值用途说明）；1 项不采纳：启动脚本改名（与包同名仅脚本执行场景无遮蔽影响，示例从简，正式分发建议 console-script） | 对抗式评审 | 全部 |
 
 ## 12. 需求覆盖对照表
 
