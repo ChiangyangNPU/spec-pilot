@@ -177,6 +177,20 @@ Host github.com
   Port 443
 ```
 
+## 6. CI 与双远程的关系
+
+自证 CI（`.github/workflows/ci.yml`）**只由 GitHub 侧触发**：本地 `master` 推送到 GitHub `main` 后自动运行（编排器单测、示例门禁与测试、沙箱作业）；推送到 Gitee 不触发任何 CI。
+
+Gitee 侧如需同等检查，可用 Gitee Go 建流水线接同一套命令（编排器零依赖，直接可跑）：
+
+```bash
+python3 orchestrator/tests/test_specpilot.py
+python3 orchestrator/specpilot.py gate 1      # 其余 gate 按阶段
+python3 orchestrator/specpilot.py test -- <测试命令>
+```
+
+当前策略：以 GitHub 侧绿灯为准，Gitee 作为镜像托管。
+
 ---
 
-> 初版：2026-08-26　最近更新：2026-09-17（修正强制推送映射、补充 SSH publickey 排障）　作者：chiangyang
+> 初版：2026-08-26　最近更新：2026-09-19（修正强制推送映射、补充 SSH publickey 排障、补充 Gitee 侧 CI 说明）　作者：chiangyang
