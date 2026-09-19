@@ -9,7 +9,8 @@ flowchart LR
     A["👤 Describe need"] --> B["Phase 1: Requirements"]
     B --> H1{"👤 Confirm SRS"}
     H1 --> C["Phase 2: Design"]
-    C --> D["Task breakdown"]
+    C --> R["AI design review"]
+    R --> D["Task breakdown"]
     D --> E["Freeze test cases"]
     E --> F["Phase 3: Coding"]
     F --> G["Phase 4: Testing"]
