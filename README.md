@@ -54,6 +54,12 @@ flowchart LR
 ln -sfn <本仓库绝对路径>/.agents/skills/spec-pilot ~/.claude/skills/spec-pilot
 ```
 
+**Codex 用户**：Codex 没有 skills 目录约定，可把 SKILL.md 软链为其自定义 prompt——`~/.codex/prompts/spec-pilot.md` 会成为 `/spec-pilot` 斜杠命令（全文注入，非按需触发）：
+
+```bash
+ln -sfn <本仓库绝对路径>/.agents/skills/spec-pilot/SKILL.md ~/.codex/prompts/spec-pilot.md
+```
+
 ```text
 # 从零开发
 /spec-pilot 做一个命令行待办事项工具，支持增删改查和优先级排序
