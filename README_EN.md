@@ -46,7 +46,11 @@ The pipeline adopts mechanisms from three open-source frameworks, adapted:
 
 ## Usage
 
-Prerequisite: an AI coding tool that supports Agent Skills (this skill follows the ZCode convention).
+Prerequisite: an AI coding tool that supports Agent Skills. The skill lives in `.agents/skills/` (ZCode convention); **Claude Code users**: the repo ships a `.claude/skills/spec-pilot` symlink pointing at the same skill — it works out of the box after cloning. To use it in any project, symlink it into your user-level directory:
+
+```bash
+ln -sfn <absolute-path-to-this-repo>/.agents/skills/spec-pilot ~/.claude/skills/spec-pilot
+```
 
 ```text
 # Greenfield project

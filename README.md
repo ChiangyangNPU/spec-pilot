@@ -48,7 +48,11 @@ flowchart LR
 
 ## 使用方法
 
-前提：使用支持 Agent Skills 的 AI 编码工具（本 skill 按 ZCode 规范编写）。
+前提：使用支持 Agent Skills 的 AI 编码工具。技能主体在 `.agents/skills/`（ZCode 规范）；**Claude Code 用户**：仓库已内置 `.claude/skills/spec-pilot` 符号链接指向同一技能，克隆即用；想在任意项目中使用，可软链到用户级目录：
+
+```bash
+ln -sfn <本仓库绝对路径>/.agents/skills/spec-pilot ~/.claude/skills/spec-pilot
+```
 
 ```text
 # 从零开发
