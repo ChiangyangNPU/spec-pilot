@@ -52,7 +52,7 @@ Prerequisite: an AI coding tool that supports Agent Skills. The skill lives in `
 ln -sfn <absolute-path-to-this-repo>/.agents/skills/spec-pilot ~/.claude/skills/spec-pilot
 ```
 
-**Codex users**: Codex has no skills-directory convention; symlink the SKILL.md as a custom prompt instead — `~/.codex/prompts/spec-pilot.md` becomes the `/spec-pilot` slash command (full-text injection, not on-demand triggering):
+**Codex users**: the repo-root `AGENTS.md` (committed) is read by Codex automatically — just say "auto-develop / run SpecPilot" inside the repo; it works out of the box via natural language (no slash command). If you want a `/spec-pilot` slash command, additionally symlink the SKILL.md as a user-level prompt (full-text injection, works in any project):
 
 ```bash
 ln -sfn <absolute-path-to-this-repo>/.agents/skills/spec-pilot/SKILL.md ~/.codex/prompts/spec-pilot.md

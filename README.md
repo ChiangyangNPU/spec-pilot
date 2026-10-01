@@ -54,7 +54,7 @@ flowchart LR
 ln -sfn <本仓库绝对路径>/.agents/skills/spec-pilot ~/.claude/skills/spec-pilot
 ```
 
-**Codex 用户**：Codex 没有 skills 目录约定，可把 SKILL.md 软链为其自定义 prompt——`~/.codex/prompts/spec-pilot.md` 会成为 `/spec-pilot` 斜杠命令（全文注入，非按需触发）：
+**Codex 用户**：仓库根的 `AGENTS.md`（已提交）会被 Codex 自动读取——在仓库内说"自动开发 / 跑 SpecPilot"即可，零配置开箱即用（自然语言触发，无斜杠命令）。若想要 `/spec-pilot` 斜杠命令，可另建用户级 prompt（全文注入，任意项目可用）：
 
 ```bash
 ln -sfn <本仓库绝对路径>/.agents/skills/spec-pilot/SKILL.md ~/.codex/prompts/spec-pilot.md
